@@ -1,0 +1,105 @@
+Update the installed package and cache on your instance 
+sudo yum update -y:
+install the most recent Docker community Edition Package
+sudo yum install -y docker:      #2023 linux
+Start the Docker service
+sudo service docker start:
+sudo service docker status:
+Add the ec2-user to the docker group do that you can run Docker commands without using sudo
+sudo useradd ec2-docker: # adding a user
+sudo usermod -a -G docker ec2-user:
+groups ec2-docker: use this command to verify if the user was added to grou # result: ec2-docker docker
+pick up the new docker group permission by logging back in again. close the current SSH terminal window and reconnect to your instance in a new one. your new ssh session should have the appropriate docker group persion
+
+verify that the ec2-user can run Docker commands without using sudo
+exit: #exit and log back
+groups:   it should show you the docker group you belong
+ls -l /var/run/docker.sock: check permission and ownership of docker socket
+sudo systemctl restart docker: restart docker service
+docker ps: test this command to use docker command without sudo
+Run some images
+
+docker run hello-world:
+docker run -it ubuntu bash: after it runs, exit 
+dock run -d --name my-container nginx:
+docker images: show all the images
+docker ps: show running containers
+docker stop my-container: stops container
+docker rm my-container: removes the container
+docker pull alpine: pull an image from Docker Hub.
+
+
+
+
+Running containtainers:
+docker run[options]Image[commands][argument]
+docker run --help # give you arguments like  "i" for interaction, 'T' for a particular versio tag EG "docker run -it ubuntu:24.10"
+"docker run -it ubuntu:24.10"
+docker ps #allows us to view the containers status
+docker images # lists out all the docker image
+docker start/stop/restart # start and stop a spefied image[specify the image ID]
+docker rm/rmi  # Remove a container/Removes an image[conteiner befor image. make sure it is not running]
+
+
+docker run --help # to get aguements
+docker ps -a #shows all the containers [-a means all ]
+docker images # shows all the images 
+docker run -it pyhthon # for example, i= interact, t= tag
+
+
+dockerile: Dockerfile
+
+FROM: specfy the image as a base
+RUN: use to execute some commands
+Copy: copy from your local to the container
+CMD: what to execute when our containers startup{argument}
+ENTRYPOINT: same as CMD but cannot be override
+example
+
+#base image
+FROM fedora
+#command to run
+LABEL maintenace: "bo"
+LABEL description: "this dockerfile install and manage apache"
+RUN yum -y update
+RUN yum install -y httpd
+#copy the index file to the container
+COPY index.html /var/www/html
+#place to add systemctl and start
+EXPOSE 80
+
+#start  container with httpd and this is the command start httpd
+ENTRYPOINT [ "usr/sbin/httpd"]
+CMD ["-D", "FOREGROUND"]
+
+#go back to your ec2 and copy Docfile, and index.html
+
+vi Dockerfile
+vi index.html
+docker build -t bo_apache_image:v1.0.0 .  #(pwd is represented by ".")
+docker run -it -p80:80 bo_apache_image:v1.0.0 # test public ip on the browser
+exit with contol +c # once you exit, it would not work on the browser.
+docker run -dit -p80:80 bo_apache_image:v1.0.0 # this would allow u interact wih the browser
+ 
+
+HOW TO PUSH THE IMAGE TO DOCKER HUB repo:
+
+Docker login # logging into docker resgistry 
+ -user name:
+ -password:
+Docker tag # tagging the image
+ -Docker images:
+ -docker tage image ID Bo_apache_image:v1.0.1: (copy the image id)
+ -docker images:
+Docker push # push to docker repository
+ -docker push Bo_apache_image:v1.0.1:
+Docker pull # retrieve to docker repository
+  - docker --version:
+  - docker pull Bo_apache_image:v1.0.1:
+  - docker run -dit -p80:80 Bo_apache_image:1.0.1:
+
+test on the browser
+  - localhost: or
+  - curl localhost:80:
+
+ https://docs.docker.com/install/ :  website for installing docker
